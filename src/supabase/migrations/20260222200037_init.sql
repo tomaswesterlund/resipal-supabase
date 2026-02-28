@@ -361,36 +361,6 @@ alter table "public"."visitors" validate constraint "visitors_user_id_fkey";
 
 set check_function_bodies = off;
 
-CREATE OR REPLACE FUNCTION public.fn_approve_payment(p_user_id uuid, p_payment_id uuid)
- RETURNS void
- LANGUAGE plpgsql
-AS $function$
-DECLARE
-    v_is_pending BOOLEAN;
-    v_amount_in_cents INT;
-BEGIN
-    -- Check if payment is in 'pending_review'?
-    SELECT (status = 'pending_review'), amount_in_cents
-    INTO v_is_pending, v_amount_in_cents
-    FROM payments
-    WHERE id = p_payment_id;
-
-    IF NOT v_is_pending THEN
-        RAISE EXCEPTION 'This payment is NOT pending review.';
-    END IF;
-
-    -- Update payment
-    UPDATE payments
-    SET status = 'approved'
-    WHERE id = p_payment_id;
-
-    -- Record the ledger movement
-    INSERT INTO public.movements (user_id, amount_in_cents, type, ref_id, description)
-    VALUES (p_user_id, (v_amount_in_cents * -1), 'payment', p_payment_id, 'Pago aprobado');
-END;
-$function$
-;
-
 CREATE OR REPLACE FUNCTION public.fn_check_is_admin(p_user_id uuid, p_community_id uuid)
  RETURNS boolean
  LANGUAGE plpgsql
@@ -403,6 +373,46 @@ BEGIN
     AND user_id = p_user_id 
     AND is_admin = TRUE
   );
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.fn_confirm_payment_received(p_community_id uuid, p_user_id uuid, p_payment_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_is_pending BOOLEAN;
+    v_payment_community_id UUID;
+BEGIN
+    -- 1. Security Check: Is the user an admin in this community?
+    IF NOT fn_check_is_admin(p_user_id, p_community_id) THEN
+        RAISE EXCEPTION 'Access Denied: User is not an admin of this community.';
+    END IF;
+
+    -- 2. Data Check: Does the payment exist, belong to this community, and is it pending?
+    SELECT (status = 'pending_review'), community_id
+    INTO v_is_pending, v_payment_community_id
+    FROM payments
+    WHERE id = p_payment_id;
+
+    -- 3. Validations
+    IF v_payment_community_id IS NULL THEN
+        RAISE EXCEPTION 'Payment not found.';
+    END IF;
+
+    IF v_payment_community_id != p_community_id THEN
+        RAISE EXCEPTION 'Cross-community update attempt detected.';
+    END IF;
+
+    IF NOT COALESCE(v_is_pending, FALSE) THEN
+        RAISE EXCEPTION 'This payment is not in a state that can be approved.';
+    END IF;
+
+    -- 4. Execute Update
+    UPDATE payments
+    SET status = 'approved'
+    WHERE id = p_payment_id;
 END;
 $function$
 ;

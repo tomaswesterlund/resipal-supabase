@@ -3,7 +3,10 @@ CREATE TABLE applications(
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id),
     community_id UUID NOT NULL REFERENCES communities(id),
-    user_id UUID NOT NULL REFERENCES users(id),
+    user_id UUID NULL REFERENCES users(id),
     status text NOT NULL CHECK (status IN ('approved', 'pending_review', 'rejected', 'revoked')),
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone_number TEXT NOT NULL,
     message TEXT
 );
