@@ -4,9 +4,9 @@ CREATE OR REPLACE FUNCTION fn_check_is_admin(
 ) RETURNS BOOLEAN AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1 FROM memberships 
+    SELECT 1 FROM users 
     WHERE community_id = p_community_id 
-    AND user_id = p_user_id 
+    AND id = p_user_id 
     AND is_admin = TRUE
   );
 END;

@@ -32,23 +32,6 @@ BEGIN
     p_user_id
   ) RETURNING id INTO new_community_id;
 
-  -- 3. Insert the Membership
-  INSERT INTO memberships (
-    user_id,
-    community_id,
-    is_admin,
-    is_security,
-    is_resident,
-    created_by
-  ) VALUES (
-    p_user_id,
-    new_community_id,
-    p_is_admin,
-    p_is_security,
-    p_is_user,
-    p_user_id
-  );
-
   RETURN new_community_id;
 
 END;
