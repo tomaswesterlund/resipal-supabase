@@ -1,12 +1,12 @@
-CREATE OR REPLACE FUNCTION fn_create_user(
-  p_name TEXT, 
-  p_email TEXT, 
-  p_phone_number TEXT,
-  p_emergency_phone_number TEXT
-)
-RETURNS UUID 
-SECURITY DEFINER
-LANGUAGE plpgsql AS $$
+drop function if exists "public"."fn_create_user"(p_name text, p_email text, p_phone_number text, p_emergency_phone_number text, p_application_status text, p_application_message text, p_is_admin boolean, p_is_resident boolean, p_is_security boolean);
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.fn_create_user(p_name text, p_email text, p_phone_number text, p_emergency_phone_number text)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
 DECLARE
   new_user_id UUID;
 BEGIN
@@ -24,4 +24,7 @@ BEGIN
 
     RETURN new_user_id;
 END;
-$$;
+$function$
+;
+
+
