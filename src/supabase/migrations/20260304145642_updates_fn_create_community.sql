@@ -1,6 +1,10 @@
-CREATE OR REPLACE FUNCTION fn_create_community(p_name text, p_description text, p_location text)
-  RETURNS uuid
-  AS $$
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.fn_create_community(p_name text, p_description text, p_location text)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
 DECLARE
   v_user_id UUID;
   new_community_id UUID;
@@ -27,7 +31,7 @@ BEGIN
     id INTO new_community_id;
   RETURN new_community_id;
 END;
-$$
-LANGUAGE plpgsql
-SECURITY DEFINER;
+$function$
+;
+
 

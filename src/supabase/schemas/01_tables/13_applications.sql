@@ -12,5 +12,6 @@ CREATE TABLE applications (
     message TEXT NOT NULL,
     is_admin BOOLEAN NOT NULL,
     is_resident BOOLEAN NOT NULL,
-    is_security BOOLEAN NOT NULL
+    is_security BOOLEAN NOT NULL,
+    UNIQUE(community_id, email)
 );
