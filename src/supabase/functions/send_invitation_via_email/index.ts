@@ -25,7 +25,7 @@ serve(async (req) => {
         <blockquote style="padding: 10px; background: #f4f4f4; border-left: 4px solid #ccc;">
           ${message}
         </blockquote>
-        <p>Para completar tu registro, descarga la app o haz clic en el siguiente botón:</p>
+        <p>Para completar tu registro, descarga la app 'Resipal Residente' o haz clic en el siguiente botón:</p>
         <a href="https://tu-app.com/registro" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
           Completar Registro
         </a>
